@@ -35,6 +35,8 @@ use std::sync::Arc;
 
 use super::traits::{FixedBaseMSM, VariableBaseMSM};
 
+use super::traits::{FixedBaseMSM, VariableBaseMSM};
+
 /// Provides an implementation of a polynomial evaluation argument
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(bound(
