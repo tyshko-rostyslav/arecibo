@@ -170,6 +170,7 @@ macro_rules! impl_traits {
         // dont do this at home
         let index = unsafe { INDEX };
         unsafe { INDEX += 1 }; 
+        eprintln!("write_abomonated: {}", index);
 
         let scalars_file = std::fs::OpenOptions::new()
           .read(true)

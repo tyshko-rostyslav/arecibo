@@ -9,7 +9,7 @@ use crate::{
   },
   scalar_as_base,
   traits::{commitment::CommitmentTrait, AbsorbInROTrait, Engine, ROTrait},
-  Commitment, CommitmentKey, CompressedCommitment, MSMContext,
+  Commitment, CommitmentKey, CompressedCommitment,
 };
 use serde::{Deserialize, Serialize};
 
@@ -90,8 +90,10 @@ impl<E: Engine> NIFS<E> {
   #[allow(clippy::too_many_arguments)]
   #[tracing::instrument(skip_all, level = "trace", name = "NIFS::prove_mut")]
   pub fn prove_mut(
-    _ck: &CommitmentKey<E>,
-    _context: &MSMContext<'_, E>,
+    #[cfg(not(feature = "preallocate"))]
+    ck: &CommitmentKey<E>,
+    #[cfg(feature = "preallocate")]
+    context: &crate::MSMContext<'_, E>,
     ro_consts: &ROConstants<E>,
     pp_digest: &E::Scalar,
     S: &R1CSShape<E>,
@@ -113,7 +115,10 @@ impl<E: Engine> NIFS<E> {
     U2.absorb_in_ro(&mut ro);
 
     // compute a commitment to the cross-term
-    let comm_T = S.commit_T_into(_ck, _context, U1, W1, U2, W2, T, ABC_Z_1, ABC_Z_2)?;
+    #[cfg(feature = "preallocate")]
+    let comm_T = S.commit_T_into(context, U1, W1, U2, W2, T, ABC_Z_1, ABC_Z_2)?;
+    #[cfg(not(feature = "preallocate"))]
+    let comm_T = S.commit_T_into(ck, U1, W1, U2, W2, T, ABC_Z_1, ABC_Z_2)?;
 
     // append `comm_T` to the transcript and obtain a challenge
     comm_T.absorb_in_ro(&mut ro);

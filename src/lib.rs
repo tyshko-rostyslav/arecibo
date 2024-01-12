@@ -374,6 +374,7 @@ pub struct ResourceBuffer<'a, E: Engine> {
   ABC_Z_1: R1CSResult<E>,
   ABC_Z_2: R1CSResult<E>,
 
+  #[allow(unused)]
   #[serde(skip)]
   msm_context: MSMContext<'a, E>,
 
@@ -566,7 +567,9 @@ where
 
     // fold the secondary circuit's instance
     let nifs_secondary = NIFS::prove_mut(
+      #[cfg(not(feature = "preallocate"))]
       &*pp.ck_secondary,
+      #[cfg(feature = "preallocate")]
       &self.buffer_secondary.msm_context,
       &pp.ro_consts_secondary,
       &scalar_as_base::<E1>(pp.digest()),
@@ -603,16 +606,23 @@ where
 
     let zi_primary = circuit_primary.synthesize(&mut cs_primary)?;
 
-    // let (l_u_primary, l_w_primary) = cs_primary.r1cs_fixed(
-    //   &pp.circuit_shape_primary.r1cs_shape,
-    //   &self.buffer_primary.msm_context,
-    // )?;
-    let (l_u_primary, l_w_primary) =
-      cs_primary.r1cs_instance_and_witness(&pp.circuit_shape_primary.r1cs_shape, &pp.ck_primary)?;
+    cfg_if::cfg_if! {
+      if #[cfg(feature = "preallocate")] {
+        let (l_u_primary, l_w_primary) = cs_primary.r1cs_fixed(
+          &pp.circuit_shape_primary.r1cs_shape,
+          &self.buffer_primary.msm_context,
+        )?;
+      } else {
+        let (l_u_primary, l_w_primary) =
+          cs_primary.r1cs_instance_and_witness(&pp.circuit_shape_primary.r1cs_shape, &pp.ck_primary)?;
+      }
+    }
 
     // fold the primary circuit's instance
     let nifs_primary = NIFS::prove_mut(
+      #[cfg(not(feature = "preallocate"))]
       &*pp.ck_primary,
+      #[cfg(feature = "preallocate")]
       &self.buffer_primary.msm_context,
       &pp.ro_consts_primary,
       &pp.digest(),
@@ -648,15 +658,17 @@ where
     );
     let zi_secondary = circuit_secondary.synthesize(&mut cs_secondary)?;
 
-    // let (l_u_secondary, l_w_secondary) = cs_secondary
-    //   .r1cs_fixed(
-    //     &pp.circuit_shape_secondary.r1cs_shape,
-    //     &self.buffer_secondary.msm_context,
-    //   )
-    //   .map_err(|_e| NovaError::UnSat)?;
-    let (l_u_secondary, l_w_secondary) = cs_secondary
-      .r1cs_instance_and_witness(&pp.circuit_shape_secondary.r1cs_shape, &pp.ck_secondary)
-      .map_err(|_e| NovaError::UnSat)?;
+    cfg_if::cfg_if! {
+      if #[cfg(feature = "preallocate")] {
+        let (l_u_secondary, l_w_secondary) = cs_secondary.r1cs_fixed(
+          &pp.circuit_shape_secondary.r1cs_shape,
+          &self.buffer_secondary.msm_context,
+        )?;
+      } else {
+        let (l_u_secondary, l_w_secondary) =
+          cs_secondary.r1cs_instance_and_witness(&pp.circuit_shape_secondary.r1cs_shape, &pp.ck_secondary)?;
+      }
+    }
 
     // update the running instances and witnesses
     self.zi_primary = zi_primary

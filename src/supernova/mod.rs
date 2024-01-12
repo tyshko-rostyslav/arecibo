@@ -483,6 +483,7 @@ struct ResourceBuffer<'a, E: Engine> {
   ABC_Z_1: R1CSResult<E>,
   ABC_Z_2: R1CSResult<E>,
 
+  #[allow(unused)]
   #[serde(skip)]
   msm_context: MSMContext<'a, E>,
 
@@ -773,7 +774,9 @@ where
 
     // fold the secondary circuit's instance
     let nifs_secondary = NIFS::prove_mut(
+      #[cfg(not(feature = "preallocate"))]
       &*pp.ck_secondary,
+      #[cfg(feature = "preallocate")]
       &self.buffer_secondary.msm_context,
       &pp.ro_consts_secondary,
       &scalar_as_base::<E1>(self.pp_digest),
@@ -847,7 +850,9 @@ where
     };
 
     let nifs_primary = NIFS::prove_mut(
+      #[cfg(not(feature = "preallocate"))]
       &*pp.ck_primary,
+      #[cfg(feature = "preallocate")]
       &self.buffer_primary.msm_context,
       &pp.ro_consts_primary,
       &self.pp_digest,
