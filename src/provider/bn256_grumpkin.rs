@@ -154,6 +154,10 @@ macro_rules! impl_traits {
           }
         }
       }
+
+      fn write_abomonated(_scalars: &Vec<Self::ScalarExt>) -> std::io::Result<()> {
+        unimplemented!()
+      }
     }
 
     impl PrimeFieldExt for $name::Scalar {

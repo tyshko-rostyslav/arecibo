@@ -249,6 +249,10 @@ where
       comm: E::GE::fixed_multiscalar_mul(v, context),
     }
   }
+
+  fn write_abomonated(v: &Vec<E::Scalar>) -> std::io::Result<()> {
+    E::GE::write_abomonated(v)
+  }
 }
 
 /// A trait listing properties of a commitment key that can be managed in a divide-and-conquer fashion

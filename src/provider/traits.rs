@@ -43,6 +43,10 @@ pub trait FixedBaseMSM: DlogGroup {
 
   /// Compute a multiexponentation against a fixed base
   fn fixed_multiscalar_mul(scalars: &[Self::ScalarExt], context: &Self::MSMContext<'_>) -> Self;
+
+  /// Writes the scalars to `$HOME/.arecibo/$i`
+  #[allow(clippy::ptr_arg)]
+  fn write_abomonated(scalars: &Vec<Self::ScalarExt>) -> std::io::Result<()>;
 }
 
 /// This implementation behaves in ways specific to the halo2curves suite of curves in:
@@ -168,6 +172,10 @@ macro_rules! impl_traits {
         context: &Self::MSMContext<'_>,
       ) -> Self {
         cpu_best_msm(context, scalars)
+      }
+
+      fn write_abomonated(_scalars: &Vec<Self::ScalarExt>) -> std::io::Result<()> {
+        unimplemented!()
       }
     }
 

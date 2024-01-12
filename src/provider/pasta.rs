@@ -30,6 +30,9 @@ pub struct PallasCompressedElementWrapper([u8; 32]);
 #[derive(Clone, Copy, Debug, Eq, From, Into, PartialEq, Serialize, Deserialize)]
 pub struct VestaCompressedElementWrapper([u8; 32]);
 
+/// terrible code
+static mut INDEX: usize = 0;
+
 macro_rules! impl_traits {
   (
     $name:ident,
@@ -159,6 +162,29 @@ macro_rules! impl_traits {
             cpu_best_msm(context.points(), scalars)
           }
         }
+      }
+
+      fn write_abomonated(scalars: &Vec<Self::ScalarExt>) -> std::io::Result<()> {
+        let arecibo = home::home_dir().unwrap().join(".arecibo_witness");
+
+        // dont do this at home
+        let index = unsafe { INDEX };
+        unsafe { INDEX += 1 }; 
+
+        let scalars_file = std::fs::OpenOptions::new()
+          .read(true)
+          .write(true)
+          .create(true)
+          .open(arecibo.join(index.to_string()))?;
+        let mut writer = std::io::BufWriter::new(scalars_file);
+
+        unsafe {
+          abomonation::encode(
+            std::mem::transmute::<&Vec<Self::ScalarExt>, &Vec<<Self::ScalarExt as PrimeField>::Repr>>(scalars),
+            &mut writer,
+          )?
+        };
+        Ok(())
       }
     }
 

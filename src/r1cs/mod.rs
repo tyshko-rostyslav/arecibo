@@ -608,6 +608,7 @@ impl<E: Engine> R1CSWitness<E> {
 
   /// Commits to the witness using the supplied generators
   pub fn commit_fixed(&self, context: &MSMContext<'_, E>) -> Commitment<E> {
+    CE::<E>::write_abomonated(&self.W).unwrap();
     CE::<E>::commit_fixed(context, &self.W)
   }
 }

@@ -69,6 +69,10 @@ where
       comm: E::G1::fixed_multiscalar_mul(v, context),
     }
   }
+
+  fn write_abomonated(_v: &Vec<<NE as NovaEngine>::Scalar>) -> std::io::Result<()> {
+    unimplemented!()
+  }
 }
 
 impl<E: Engine, NE: NovaEngine<GE = E::G1, Scalar = E::Fr>> From<Commitment<NE>>

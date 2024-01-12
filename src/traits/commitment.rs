@@ -93,4 +93,8 @@ pub trait CommitmentEngineTrait<E: Engine>: Clone + Send + Sync {
 
   /// Commits to the provided vector using the fixed generators
   fn commit_fixed(context: &Self::MSMContext<'_>, v: &[E::Scalar]) -> Self::Commitment;
+
+  /// write_abomonated
+  #[allow(clippy::ptr_arg)]
+  fn write_abomonated(v: &Vec<E::Scalar>) -> std::io::Result<()>;
 }
