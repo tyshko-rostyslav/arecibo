@@ -3,6 +3,9 @@ use group::{prime::PrimeCurve, GroupEncoding};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
+/// terrible code
+pub static mut INDEX: usize = 0;
+
 /// A trait that defines extensions to the Group trait
 pub trait DlogGroup:
   Group<Scalar = <Self as DlogGroup>::ScalarExt>

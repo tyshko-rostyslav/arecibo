@@ -50,7 +50,7 @@ pub fn bench_snark_internal_with_arity<
   };
   let z0_primary = vec![<E1 as Engine>::Scalar::from(2u64)];
   let z0_secondary = vec![<E2 as Engine>::Scalar::from(2u64)];
-  let mut recursive_snark_option: Option<RecursiveSNARK<E1, E2>> = None;
+  let mut recursive_snark_option: Option<RecursiveSNARK<'_, E1, E2>> = None;
   let mut selected_augmented_circuit = 0;
 
   for _ in 0..num_warmup_steps {

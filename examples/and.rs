@@ -263,7 +263,7 @@ fn main() {
 
     // produce a recursive SNARK
     println!("Generating a RecursiveSNARK...");
-    let mut recursive_snark: RecursiveSNARK<E1, E2, C1, C2> =
+    let mut recursive_snark: RecursiveSNARK<'_, E1, E2, C1, C2> =
       RecursiveSNARK::<E1, E2, C1, C2>::new(
         &pp,
         &circuits[0],

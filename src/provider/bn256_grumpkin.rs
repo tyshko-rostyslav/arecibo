@@ -1,7 +1,7 @@
 //! This module implements the Nova traits for `bn256::Point`, `bn256::Scalar`, `grumpkin::Point`, `grumpkin::Scalar`.
 use crate::{
   provider::{
-    traits::{DlogGroup, FixedBaseMSM, VariableBaseMSM},
+    traits::{DlogGroup, FixedBaseMSM, VariableBaseMSM, INDEX},
     util::msm::cpu_best_msm,
   },
   traits::{Group, PrimeFieldExt, TranscriptReprTrait},
@@ -155,8 +155,28 @@ macro_rules! impl_traits {
         }
       }
 
-      fn write_abomonated(_scalars: &Vec<Self::ScalarExt>) -> std::io::Result<()> {
-        unimplemented!()
+      fn write_abomonated(scalars: &Vec<Self::ScalarExt>) -> std::io::Result<()> {
+        let arecibo = home::home_dir().unwrap().join(".arecibo_witness");
+
+        // dont do this at home
+        let index = unsafe { INDEX };
+        unsafe { INDEX += 1 };
+        eprintln!("write_abomonated: {}", index);
+
+        let scalars_file = std::fs::OpenOptions::new()
+          .read(true)
+          .write(true)
+          .create(true)
+          .open(arecibo.join(index.to_string()))?;
+        let mut writer = std::io::BufWriter::new(scalars_file);
+
+        unsafe {
+          abomonation::encode(
+            std::mem::transmute::<&Vec<Self::ScalarExt>, &Vec<<Self::ScalarExt as PrimeField>::Repr>>(scalars),
+            &mut writer,
+          )?
+        };
+        Ok(())
       }
     }
 

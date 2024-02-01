@@ -468,10 +468,8 @@ impl<E: Engine> R1CSShape<E> {
   /// This is [`R1CSShape::commit_T`] but into a buffer.
   pub fn commit_T_into(
     &self,
-    #[cfg(not(feature = "preallocate"))]
-    ck: &CommitmentKey<E>,
-    #[cfg(feature = "preallocate")]
-    context: &MSMContext<'_, E>,
+    #[cfg(not(feature = "preallocate"))] ck: &CommitmentKey<E>,
+    #[cfg(feature = "preallocate")] context: &MSMContext<'_, E>,
     U1: &RelaxedR1CSInstance<E>,
     W1: &RelaxedR1CSWitness<E>,
     U2: &R1CSInstance<E>,
@@ -512,13 +510,13 @@ impl<E: Engine> R1CSShape<E> {
         .collect_into_vec(T)
     });
 
-    eprint!("commit T: ");
     cfg_if::cfg_if! {
       if #[cfg(feature = "preallocate")] {
         CE::<E>::write_abomonated(T).unwrap();
         let commit_T_fixed = CE::<E>::commit_fixed(context, T);
         Ok(commit_T_fixed)
       } else {
+        CE::<E>::write_abomonated(T).unwrap();
         let commit_T = CE::<E>::commit(ck, T);
         Ok(commit_T)
       }
@@ -610,6 +608,7 @@ impl<E: Engine> R1CSWitness<E> {
 
   /// Commits to the witness using the supplied generators
   pub fn commit(&self, ck: &CommitmentKey<E>) -> Commitment<E> {
+    CE::<E>::write_abomonated(&self.W).unwrap();
     CE::<E>::commit(ck, &self.W)
   }
 

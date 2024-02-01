@@ -90,10 +90,8 @@ impl<E: Engine> NIFS<E> {
   #[allow(clippy::too_many_arguments)]
   #[tracing::instrument(skip_all, level = "trace", name = "NIFS::prove_mut")]
   pub fn prove_mut(
-    #[cfg(not(feature = "preallocate"))]
-    ck: &CommitmentKey<E>,
-    #[cfg(feature = "preallocate")]
-    context: &crate::MSMContext<'_, E>,
+    #[cfg(not(feature = "preallocate"))] ck: &CommitmentKey<E>,
+    #[cfg(feature = "preallocate")] context: &crate::MSMContext<'_, E>,
     ro_consts: &ROConstants<E>,
     pp_digest: &E::Scalar,
     S: &R1CSShape<E>,

@@ -483,7 +483,7 @@ mod tests {
   where
     E: MultiMillerLoop,
     E::Fr: PrimeFieldBits,
-    E::G1: DlogGroup<ScalarExt = E::Fr, AffineExt = E::G1Affine>,
+    E::G1: DlogGroup<ScalarExt = E::Fr, AffineExt = E::G1Affine> + VariableBaseMSM,
   {
     for _ in 0..10 {
       let mut rng = &mut thread_rng();

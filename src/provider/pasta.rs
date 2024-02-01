@@ -1,7 +1,7 @@
 //! This module implements the Nova traits for `pallas::Point`, `pallas::Scalar`, `vesta::Point`, `vesta::Scalar`.
 use crate::{
   provider::{
-    traits::{DlogGroup, FixedBaseMSM, VariableBaseMSM},
+    traits::{DlogGroup, FixedBaseMSM, VariableBaseMSM, INDEX},
     util::msm::cpu_best_msm,
   },
   traits::{Group, PrimeFieldExt, TranscriptReprTrait},
@@ -29,9 +29,6 @@ pub struct PallasCompressedElementWrapper([u8; 32]);
 /// A wrapper for compressed group elements of vesta
 #[derive(Clone, Copy, Debug, Eq, From, Into, PartialEq, Serialize, Deserialize)]
 pub struct VestaCompressedElementWrapper([u8; 32]);
-
-/// terrible code
-static mut INDEX: usize = 0;
 
 macro_rules! impl_traits {
   (
@@ -123,7 +120,7 @@ macro_rules! impl_traits {
           let zero_count = scalars.par_iter().filter(|s|<$name::Scalar as ff::Field>::is_zero_vartime(s)).count();
           let start = std::time::Instant::now();
           let ret = grumpkin_msm::pasta::$name::msm(bases, scalars);
-          eprintln!("zeros, scalars, time: {}, {}, {:?}", zero_count, scalars.len(), start.elapsed());
+          eprintln!("zeros, scalars, time: {:10}, {:10}, {:10?}", zero_count, scalars.len(), start.elapsed());
           ret
         } else {
           cpu_best_msm(bases, scalars)
@@ -156,7 +153,7 @@ macro_rules! impl_traits {
             let zero_count = scalars.par_iter().filter(|s|<$name::Scalar as ff::Field>::is_zero_vartime(s)).count();
             let start = std::time::Instant::now();
             let ret = grumpkin_msm::pasta::$name::with(context, scalars);
-            eprintln!("zeros, scalars, preallocated-time: {}, {}, {:?}", zero_count, scalars.len(), start.elapsed());
+            eprintln!("zeros, scalars, time: {:10}, {:10}, {:10?} <preallocated>", zero_count, scalars.len(), start.elapsed());
             ret
           } else {
             cpu_best_msm(context.points(), scalars)
@@ -169,8 +166,8 @@ macro_rules! impl_traits {
 
         // dont do this at home
         let index = unsafe { INDEX };
-        unsafe { INDEX += 1 }; 
-        eprintln!("write_abomonated: {}", index);
+        unsafe { INDEX += 1 };
+        eprintln!("write abomonated: {}", index);
 
         let scalars_file = std::fs::OpenOptions::new()
           .read(true)
